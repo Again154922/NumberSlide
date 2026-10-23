@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NumberSlide.Core", "src\NumberSlide.Core\NumberSlide.Core.csproj", "{F953F085-42F8-4FCF-A14C-0DBA1940BBBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NumberSlideConsole", "src\NumberSlideConsole\NumberSlideConsole.csproj", "{C22E4DCF-F730-457E-B9E5-A84AA3AA72F0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F953F085-42F8-4FCF-A14C-0DBA1940BBBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F953F085-42F8-4FCF-A14C-0DBA1940BBBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F953F085-42F8-4FCF-A14C-0DBA1940BBBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F953F085-42F8-4FCF-A14C-0DBA1940BBBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C22E4DCF-F730-457E-B9E5-A84AA3AA72F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C22E4DCF-F730-457E-B9E5-A84AA3AA72F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C22E4DCF-F730-457E-B9E5-A84AA3AA72F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C22E4DCF-F730-457E-B9E5-A84AA3AA72F0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

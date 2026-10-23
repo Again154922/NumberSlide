@@ -1,0 +1,33 @@
+# .NET build output
+**/bin/
+**/obj/
+artifacts/
+TestResults/
+
+# Rider / Visual Studio
+.idea/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.sln.iml
+
+# Unity project files
+src/NumberSlideUnity/[Ll]ibrary/
+src/NumberSlideUnity/[Tt]emp/
+src/NumberSlideUnity/[Oo]bj/
+src/NumberSlideUnity/[Bb]uild/
+src/NumberSlideUnity/[Bb]uilds/
+src/NumberSlideUnity/[Ll]ogs/
+src/NumberSlideUnity/[Uu]ser[Ss]ettings/
+src/NumberSlideUnity/*.csproj
+src/NumberSlideUnity/*.sln
+src/NumberSlideUnity/*.slnx
+src/NumberSlideUnity/*.unityproj
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
