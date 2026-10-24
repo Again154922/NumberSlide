@@ -56,6 +56,9 @@ Core 不依赖控制台或 Unity API。后续 Unity 版本应通过 Core 公开�
 - 增加存档、读取和损坏存档处理。
 - 创建 Unity 版本，复用 `NumberSlide.Core`。
 
+Unity 版的像素规格、素材目录、场景布局、Prefab 和组件要求见
+[Unity 开发规格](docs/unity-development.md)。
+
 ## 技术说明
 
 方向键表示方块的移动方向，因此空格会向相反方向移动。例如按左键时，空格向右移动，空格右侧的方块滑入旧空格位置。
