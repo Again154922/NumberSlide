@@ -10,10 +10,10 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
 }
 
 $boardPixels = 1024
-$displayBoardPixels = 640
-$displayScale = $displayBoardPixels / $boardPixels
+$pixelsPerUnit = 100
+$boardWorldUnits = $boardPixels / $pixelsPerUnit
 $boardGapPixels = 12
-$displayGapPixels = $boardGapPixels * $displayScale
+$boardGapWorldUnits = $boardGapPixels / $pixelsPerUnit
 
 $tileSpecs = @(
     [pscustomobject]@{ Grid = 3; TilePixels = 312 },
@@ -35,18 +35,18 @@ New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
 foreach ($spec in $tileSpecs) {
     $grid = [int]$spec.Grid
     $tilePixels = [int]$spec.TilePixels
-    $displayTilePixels = $tilePixels * $displayScale
+    $tileWorldUnits = $tilePixels / $pixelsPerUnit
     $contentPixels = $grid * $tilePixels + ($grid - 1) * $boardGapPixels
-    $displayOffset = (($boardPixels - $contentPixels) / 2.0) * $displayScale
-    $displayStep = $displayTilePixels + $displayGapPixels
-    $displayCenter = $displayBoardPixels / 2.0
+    $offsetWorldUnits = (($boardPixels - $contentPixels) / 2.0) / $pixelsPerUnit
+    $stepWorldUnits = $tileWorldUnits + $boardGapWorldUnits
+    $worldCenter = $boardWorldUnits / 2.0
 
     $matrix = @()
     for ($row = 0; $row -lt $grid; $row++) {
         $rowCells = @()
         for ($column = 0; $column -lt $grid; $column++) {
-            $x = $displayCenter - $displayOffset - $displayTilePixels / 2.0 - $column * $displayStep
-            $y = $displayCenter - $displayOffset - $displayTilePixels / 2.0 - $row * $displayStep
+            $x = $worldCenter - $offsetWorldUnits - $tileWorldUnits / 2.0 - $column * $stepWorldUnits
+            $y = $worldCenter - $offsetWorldUnits - $tileWorldUnits / 2.0 - $row * $stepWorldUnits
 
             $rowCells += ,@(
                 (Round-Position $x),

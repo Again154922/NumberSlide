@@ -204,7 +204,7 @@ displayCellY = displayOffset + row * (displayTile + 7.5)
 
 当 `orthographicSize = 6` 时，摄像机可视高度是 `12` 世界单位，因此 `10.24×10.24` 的棋盘可以在高度方向完整显示。
 
-注意：Canvas 的 Screen Space 参考像素和世界单位不是同一套坐标。棋盘 JSON 使用 `640×640` Canvas 参考像素；如果把棋盘放进世界空间，则需要按 `worldSize / 640` 缩放这些坐标。
+注意：棋盘 JSON 的坐标单位是 Unity 世界单位，不是 Canvas 参考像素。若使用 World Space Canvas 并把 Canvas Scale 设为 `1`，世界坐标可以直接作为 RectTransform 的局部坐标；若使用 `640×640` 的 Screen Space 棋盘，则需要乘以 `640 / 10.24 = 62.5` 转换成 Canvas 单位。
 
 重新生成素材：
 
@@ -233,48 +233,54 @@ NumberSlideUnity/Assets/Resources/BoardLayouts/
 坐标系统：
 
 ```text
-原点：640×640 棋盘中心
+原点：10.24×10.24 棋盘中心
 X 轴：向右为正
 Y 轴：向上为正
-单位：Canvas 参考像素
+单位：Unity 世界单位
 ```
 
-每个 JSON 包含当前棋盘全部 `grid × grid` 个格子，空格所在的坐标同样存在。格子的 `localPosition` 可以直接赋给 Tile 的 `anchoredPosition`，前提是：
+每个 JSON 包含当前棋盘全部 `grid × grid` 个格子，空格所在的坐标同样存在。以下情况可以近似直接使用这些局部坐标：
 
 ```text
+World Space Canvas: localScale = 1
+Board RectTransform: 10.24 × 10.24
 Board: Anchor Min/Max = (0.5, 0.5), Pivot = (0.5, 0.5)
 Tile:  Anchor Min/Max = (0.5, 0.5), Pivot = (0.5, 0.5)
 ```
+
+如果使用 Screen Space Canvas 的 `640×640` 棋盘，则要先执行 `position *= 62.5`。
 
 示例：
 
 ```json
 [
   [
-    [202.5, 202.5],
-    [0.0, 202.5],
-    [-202.5, 202.5]
+    [3.24, 3.24],
+    [0.0, 3.24],
+    [-3.24, 3.24]
   ],
   [
-    [202.5, 0.0],
+    [3.24, 0.0],
     [0.0, 0.0],
-    [-202.5, 0.0]
+    [-3.24, 0.0]
   ],
   [
-    [202.5, -202.5],
-    [0.0, -202.5],
-    [-202.5, -202.5]
+    [3.24, -3.24],
+    [0.0, -3.24],
+    [-3.24, -3.24]
   ]
 ]
 ```
 
-JSON 顶层是行数组，每一行是列数组，每个格子是 `[x, y]`。索引方式：
+JSON 顶层是行数组，每一行是列数组，每个格子是 `[x, y]`，坐标单位是世界单位。索引方式：
 
 ```csharp
 Vector2 localPosition = new(values[row][column][0], values[row][column][1]);
 ```
 
 由于文件顶层是数组，Unity 自带的 `JsonUtility` 不能直接反序列化。可以使用 Newtonsoft.Json 的 `JsonConvert.DeserializeObject<float[][][]>`，或实现一个只支持数字数组的轻量解析器。
+
+`System.Text.Json.JsonSerializer` 在 Unity 2022.3 中不是默认引用的 API。它会自动支持顶层数组，但需要额外安装兼容的 `System.Text.Json` NuGet 包。`System.Web.Script.Serialization.JavaScriptSerializer` 也不属于 Unity 默认可用 API，不建议在 Unity 项目中使用。
 
 重新生成布局 JSON：
 
@@ -613,10 +619,16 @@ Tile Pivot: (0.5, 0.5)
 
 ```csharp
 var cell = values[row][column];
-rectTransform.anchoredPosition = new Vector2(cell[0], cell[1]);
+Vector2 worldPosition = new(cell[0], cell[1]);
+
+// World Space Canvas，Scale = 1，Board = 10.24 × 10.24
+rectTransform.localPosition = worldPosition;
+
+// 或者 Screen Space Canvas，Board = 640 × 640
+rectTransform.anchoredPosition = worldPosition * 62.5f;
 ```
 
-当 Board 和 Tile 的 Pivot 都是中心，且两者 Anchor 都位于中心时，`anchoredPosition` 与 `localPosition` 数值相同。
+当 Board 和 Tile 的 Pivot 都是中心，且两者 Anchor 都位于中心时，`anchoredPosition` 与 `localPosition` 在同一坐标单位下数值相同。JSON 本身使用世界单位，不能直接当作 640 Canvas 的像素坐标。
 
 ### 7.1 Camera 正交尺寸与 RectTransform
 
