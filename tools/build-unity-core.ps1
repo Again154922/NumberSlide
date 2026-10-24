@@ -11,7 +11,7 @@ $destination = Join-Path $repoRoot 'NumberSlideUnity\Assets\Plugins\NumberSlide.
 
 dotnet build $project -c $Configuration -f netstandard2.1
 if ($LASTEXITCODE -ne 0) {
-    throw "NumberSlide.Core 编译失败。"
+    throw "NumberSlide.Core build failed."
 }
 
 $files = @(
@@ -28,7 +28,7 @@ New-Item -ItemType Directory -Path $destination -Force | Out-Null
 foreach ($file in $files) {
     $sourcePath = Join-Path $output $file
     if (-not (Test-Path -LiteralPath $sourcePath)) {
-        throw "缺少构建产物: $sourcePath"
+        throw "Missing build output: $sourcePath"
     }
 
     Copy-Item `

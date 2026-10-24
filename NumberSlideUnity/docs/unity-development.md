@@ -34,8 +34,8 @@ NumberSlideUnity/Assets/Images/
 Images/
 ├── asset-manifest.json
 ├── 3x3/
-│   ├── Board.png
-│   └── Tile.png
+│   ├── board3.png
+│   └── tile3.png
 ├── 4x4/
 ├── 5x5/
 ├── 6x6/
@@ -49,14 +49,14 @@ Images/
 
 | 文件 | 用途 |
 | --- | --- |
-| `Board.png` | 棋盘底板和空格槽 |
-| `Tile.png` | 所有数字共用的空白方块 |
+| `board{N}.png` | 对应难度的棋盘底板和空格槽 |
+| `tile{N}.png` | 对应难度所有数字共用的空白方块 |
 
 数字不烘焙进方块图片，而是由 Tile Prefab 中的 TextMeshPro 子对象显示。
 
 ### 2.1 原生像素规格
 
-所有 `Board.png` 全部为 `1024 × 1024`，不随难度改变。难度通过方块尺寸和间距改变。
+所有 `board{N}.png` 全部为 `1024 × 1024`，不随难度改变。难度通过方块尺寸和间距改变。
 
 | 地图 | 棋盘图片 | 方块图片 | 间距 | 棋盘内容区 | 居中偏移 |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -69,7 +69,7 @@ Images/
 | 9×9 | 1024×1024 | 96×96 | 12 | 960 | 32 |
 | 10×10 | 1024×1024 | 85×85 | 12 | 958 | 33 |
 
-`Tile.png` 的尺寸由难度决定，下表仍然适用。
+`tile{N}.png` 的尺寸由难度决定，下表仍然适用。
 
 计算公式：
 
@@ -119,18 +119,18 @@ displayCellY = displayOffset + row * (displayTile + 7.5)
 
 ### 2.3 TextMeshPro 数字字号
 
-数字使用 `TextMeshProUGUI` 居中显示，建议字号：
+数字使用世界空间 `TextMeshPro` 居中显示，字号与对应 Tile 尺寸等比：
 
 | 地图 | 字号 |
 | --- | ---: |
-| 3×3 | 96 |
-| 4×4 | 72 |
-| 5×5 | 58 |
-| 6×6 | 48 |
-| 7×7 | 40 |
-| 8×8 | 34 |
-| 9×9 | 30 |
-| 10×10 | 26 |
+| 3×3 | 20 |
+| 4×4 | 15 |
+| 5×5 | 12 |
+| 6×6 | 10 |
+| 7×7 | 8 |
+| 8×8 | 7 |
+| 9×9 | 6 |
+| 10×10 | 5.5 |
 
 数字为 `0` 时不创建 Tile；棋盘底图的槽位直接作为空格。
 
@@ -160,7 +160,7 @@ displayCellY = displayOffset + row * (displayTile + 7.5)
 | --- | --- |
 | Texture Type | Sprite (2D and UI) |
 | Sprite Mode | Single |
-| Pixels Per Unit | 100 |
+| Pixels Per Unit | 120 |
 | Mesh Type | Full Rect |
 | Extrude Edges | 0 |
 | Wrap Mode | Clamp |
@@ -174,37 +174,37 @@ displayCellY = displayOffset + row * (displayTile + 7.5)
 
 ### 2.6 Unity 世界单位与像素换算
 
-所有 Sprite 的 `Pixels Per Unit` 固定为 `100`，因此：
+所有 Sprite 的 `Pixels Per Unit` 固定为 `120`，因此：
 
 ```text
-1 Unity 世界单位 = 100 像素
-1 像素 = 0.01 Unity 世界单位
+1 Unity 世界单位 = 120 像素
+1 像素 = 1/120 Unity 世界单位
 ```
 
 当 SpriteRenderer 的 `Transform.localScale = (1, 1, 1)` 时：
 
 | 资源 | 像素尺寸 | 世界尺寸 |
 | --- | ---: | ---: |
-| Board.png | 1024×1024 | 10.24×10.24 |
-| 3×3 Tile | 312×312 | 3.12×3.12 |
-| 4×4 Tile | 231×231 | 2.31×2.31 |
-| 5×5 Tile | 182×182 | 1.82×1.82 |
-| 6×6 Tile | 150×150 | 1.50×1.50 |
-| 7×7 Tile | 126×126 | 1.26×1.26 |
-| 8×8 Tile | 109×109 | 1.09×1.09 |
-| 9×9 Tile | 96×96 | 0.96×0.96 |
-| 10×10 Tile | 85×85 | 0.85×0.85 |
-| 格间距 | 12 | 0.12 |
+| board{N}.png | 1024×1024 | 8.5333×8.5333 |
+| 3×3 Tile | 312×312 | 2.6000×2.6000 |
+| 4×4 Tile | 231×231 | 1.9250×1.9250 |
+| 5×5 Tile | 182×182 | 1.5167×1.5167 |
+| 6×6 Tile | 150×150 | 1.2500×1.2500 |
+| 7×7 Tile | 126×126 | 1.0500×1.0500 |
+| 8×8 Tile | 109×109 | 0.9083×0.9083 |
+| 9×9 Tile | 96×96 | 0.8000×0.8000 |
+| 10×10 Tile | 85×85 | 0.7083×0.7083 |
+| 格间距 | 12 | 0.1000 |
 
 如果把整个棋盘作为 SpriteRenderer 放进世界：
 
 ```text
-1024 px / 100 PPU = 10.24 Unity 世界单位
+1024 px / 120 PPU = 8.5333 Unity 世界单位
 ```
 
-当 `orthographicSize = 6` 时，摄像机可视高度是 `12` 世界单位，因此 `10.24×10.24` 的棋盘可以在高度方向完整显示。
+当 `orthographicSize = 6` 时，摄像机可视高度是 `12` 世界单位，因此 `8.5333×8.5333` 的棋盘可以在高度方向完整显示。
 
-注意：棋盘 JSON 的坐标单位是 Unity 世界单位，不是 Canvas 参考像素。若使用 World Space Canvas 并把 Canvas Scale 设为 `1`，世界坐标可以直接作为 RectTransform 的局部坐标；若使用 `640×640` 的 Screen Space 棋盘，则需要乘以 `640 / 10.24 = 62.5` 转换成 Canvas 单位。
+注意：棋盘 JSON 的坐标单位是 Unity 世界单位，不是 Canvas 参考像素。若使用 World Space Canvas 并把 Canvas Scale 设为 `1`，世界坐标可以直接作为 RectTransform 的局部坐标；若使用 `640×640` 的 Screen Space 棋盘，则需要乘以 `640 / 8.5333 = 75` 转换成 Canvas 单位。
 
 重新生成素材：
 
@@ -233,7 +233,7 @@ NumberSlideUnity/Assets/Resources/BoardLayouts/
 坐标系统：
 
 ```text
-原点：10.24×10.24 棋盘中心
+原点：8.5333×8.5333 棋盘中心
 X 轴：向右为正
 Y 轴：向上为正
 单位：Unity 世界单位
@@ -243,31 +243,31 @@ Y 轴：向上为正
 
 ```text
 World Space Canvas: localScale = 1
-Board RectTransform: 10.24 × 10.24
+Board RectTransform: 8.5333 × 8.5333
 Board: Anchor Min/Max = (0.5, 0.5), Pivot = (0.5, 0.5)
 Tile:  Anchor Min/Max = (0.5, 0.5), Pivot = (0.5, 0.5)
 ```
 
-如果使用 Screen Space Canvas 的 `640×640` 棋盘，则要先执行 `position *= 62.5`。
+如果使用 Screen Space Canvas 的 `640×640` 棋盘，则要先执行 `position *= 75`。
 
 示例：
 
 ```json
 [
   [
-    [3.24, 3.24],
-    [0.0, 3.24],
-    [-3.24, 3.24]
+    [-2.7, 2.7],
+    [0.0, 2.7],
+    [2.7, 2.7]
   ],
   [
-    [3.24, 0.0],
+    [-2.7, 0.0],
     [0.0, 0.0],
-    [-3.24, 0.0]
+    [2.7, 0.0]
   ],
   [
-    [3.24, -3.24],
-    [0.0, -3.24],
-    [-3.24, -3.24]
+    [-2.7, -2.7],
+    [0.0, -2.7],
+    [2.7, -2.7]
   ]
 ]
 ```
@@ -452,7 +452,7 @@ Board
 ├── RectTransform: 640×640
 ├── CanvasRenderer
 ├── Image
-│   ├── Source Image: 当前难度 Board.png
+│   ├── Source Image: 当前难度 board{N}.png
 │   ├── Type: Simple
 │   ├── Preserve Aspect: On
 │   └── Raycast Target: Off
@@ -479,35 +479,38 @@ int gapPixels
 int offsetPixels
 ```
 
-每个难度只需要引用对应目录的一张 `Tile.png`。数字由 Tile Prefab 内的 TextMeshPro 子对象显示。直接按下表和 `asset-manifest.json` 填写尺寸，不在运行时从文件系统读取。
+每个难度只需要引用对应目录的一张 `tile{N}.png`。数字由 Tile Prefab 内的 TextMeshPro 子对象显示。直接按下表和 `asset-manifest.json` 填写尺寸，不在运行时从文件系统读取。
 
-### 4.2 Tile.prefab
+### 4.2 Tile Prefab
 
 ```text
-Tile
-├── RectTransform: tilePixels * 0.625 正方形
-├── CanvasRenderer
-├── Image
-│   ├── Source Image: Tile.png
-│   ├── Raycast Target: Off
-│   └── Preserve Aspect: On
-├── TileView (MonoBehaviour)
-└── Number
-    ├── RectTransform: 拉伸填满 Tile，四边为 0
-    ├── TextMeshProUGUI
+Tile3 ～ Tile10
+├── Transform
+├── SpriteRenderer
+│   ├── Sprite: 对应难度的 tile{N}.png
+│   └── Sorting Order: 10
+└── NumberText
+    ├── MeshRenderer
+    ├── TextMeshPro
     ├── Alignment: Center / Middle
-    ├── Raycast Target: Off
+    ├── Sorting Order: 11
     └── Color: #5C4B3A
 ```
 
-`TileView` 公开接口：
+TMP 使用世界空间 `TextMeshPro`，不需要 Canvas 或 `TextMeshProUGUI`。当前 Prefab：
 
-```text
-void SetNumber(byte value)
-void SetHighlight(bool enabled)
-```
+| Prefab | Sprite | 世界尺寸 | 字号 |
+| --- | --- | ---: | ---: |
+| Tile3.prefab | tile3.png | 2.6 | 20 |
+| Tile4.prefab | tile4.png | 1.925 | 15 |
+| Tile5.prefab | tile5.png | 1.5167 | 12 |
+| Tile6.prefab | tile6.png | 1.25 | 10 |
+| Tile7.prefab | tile7.png | 1.05 | 8 |
+| Tile8.prefab | tile8.png | 0.9083 | 7 |
+| Tile9.prefab | tile9.png | 0.8 | 6 |
+| Tile10.prefab | tile10.png | 0.7083 | 5.5 |
 
-数字 TextMeshPro 子对象不需要额外 Canvas。它会自动继承 Tile 所在的根 Canvas。不要为每个 Tile 添加 Canvas 或 Canvas Scaler。数字为 `0` 时不创建 Tile；对应位置只显示 `Board.png` 中的空格槽。
+数字为 `0` 时不创建 Tile；对应位置只显示 `board{N}.png` 中的空格槽。运行时可以复用同一个 Prefab，并通过 `NumberText.text` 设置数字。
 
 ### 4.3 WinPanel.prefab
 
@@ -643,11 +646,11 @@ Tile Pivot: (0.5, 0.5)
 var cell = values[row][column];
 Vector2 worldPosition = new(cell[0], cell[1]);
 
-// World Space Canvas，Scale = 1，Board = 10.24 × 10.24
+// World Space Canvas，Scale = 1，Board = 8.5333 × 8.5333
 rectTransform.localPosition = worldPosition;
 
 // 或者 Screen Space Canvas，Board = 640 × 640
-rectTransform.anchoredPosition = worldPosition * 62.5f;
+rectTransform.anchoredPosition = worldPosition * 75f;
 ```
 
 当 Board 和 Tile 的 Pivot 都是中心，且两者 Anchor 都位于中心时，`anchoredPosition` 与 `localPosition` 在同一坐标单位下数值相同。JSON 本身使用世界单位，不能直接当作 640 Canvas 的像素坐标。
@@ -698,7 +701,7 @@ anchoredPosition: (0, 0)
 
 | 状态 | 显示方式 |
 | --- | --- |
-| 普通 | `Tile.png`，数字由 TMP 子对象显示 |
+| 普通 | `tile{N}.png`，数字由 TMP 子对象显示 |
 | 正确位置 | 保持原 Sprite，添加 `Outline`，颜色 `#C25A35` |
 | 提示 | 保持原 Sprite，添加 `Outline`，颜色 `#E0A33A`，可放大至 `1.04` |
 
@@ -745,7 +748,7 @@ anchoredPosition: (0, 0)
 
 - MainMenu 是 Build Settings 第一场景。
 - 3×3～10×10 都能创建合法且可解的棋盘。
-- 每种难度的 Board.png 都显示为正方形。
+- 每种难度的 `board{N}.png` 都显示为正方形。
 - 每种难度的方块尺寸与本文档表格一致。
 - 3×3 方块 312×312，10×10 方块 85×85。
 - 数字 0 不显示 Tile。

@@ -10,7 +10,7 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
 }
 
 $boardPixels = 1024
-$pixelsPerUnit = 100
+$pixelsPerUnit = 120
 $boardWorldUnits = $boardPixels / $pixelsPerUnit
 $boardGapPixels = 12
 $boardGapWorldUnits = $boardGapPixels / $pixelsPerUnit
@@ -45,7 +45,8 @@ foreach ($spec in $tileSpecs) {
     for ($row = 0; $row -lt $grid; $row++) {
         $rowCells = @()
         for ($column = 0; $column -lt $grid; $column++) {
-            $x = $worldCenter - $offsetWorldUnits - $tileWorldUnits / 2.0 - $column * $stepWorldUnits
+            # BoardMap 的 column 增大对应屏幕向右，row 增大对应屏幕向下。
+            $x = -$worldCenter + $offsetWorldUnits + $tileWorldUnits / 2.0 + $column * $stepWorldUnits
             $y = $worldCenter - $offsetWorldUnits - $tileWorldUnits / 2.0 - $row * $stepWorldUnits
 
             $rowCells += ,@(

@@ -9,7 +9,7 @@ public class Game(byte boardWidth)
         { Direction.Right, (0, -1) }
     };
     public readonly Board board = new Board(boardWidth);
-    public readonly Stack<byte[,]> MoveStack = new();
+    private readonly Stack<byte[,]> MoveStack = new();
 
     public void Move(Direction direction)
     {
@@ -71,5 +71,4 @@ public class Game(byte boardWidth)
             }
         }
     }
-
 }

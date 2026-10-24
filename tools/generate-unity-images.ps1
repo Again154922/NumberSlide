@@ -232,7 +232,7 @@ foreach ($spec in $tileSpecs) {
     $folder = Join-Path $OutputRoot $folderName
     New-Item -ItemType Directory -Path $folder -Force | Out-Null
 
-    $obsoleteNames = @('Tile.png', 'TileCorrect.png', 'TileHint.png')
+    $obsoleteNames = @('Board.png', 'Tile.png', 'TileCorrect.png', 'TileHint.png')
     $obsoleteNames += Get-ChildItem -LiteralPath $folder -File -Filter 'Tile_*.png' |
         ForEach-Object { $_.Name }
     foreach ($obsoleteName in $obsoleteNames | Select-Object -Unique) {
@@ -246,15 +246,15 @@ foreach ($spec in $tileSpecs) {
         }
     }
 
-    Save-Board (Join-Path $folder 'Board.png') $rows $tileSize
-    Save-Tile (Join-Path $folder 'Tile.png') $tileSize
+    Save-Board (Join-Path $folder "board$rows.png") $rows $tileSize
+    Save-Tile (Join-Path $folder "tile$rows.png") $tileSize
 
     $contentPixels = $rows * $tileSize + ($rows - 1) * $boardGap
     $manifestEntries += [ordered]@{
         grid = $rows
         folder = $folderName
-        board = 'Board.png'
-        tile = 'Tile.png'
+        board = "board$rows.png"
+        tile = "tile$rows.png"
         boardPixels = $boardPixels
         tilePixels = $tileSize
         gapPixels = $boardGap
