@@ -42,9 +42,10 @@ public class Board
         for (int i = 0; i < values.Length; i++)
             values[i] = (byte)i;
 
+        Random random = new();
         for (int i = values.Length - 1; i > 0; i--)
         {
-            int j = Random.Shared.Next(i + 1);
+            int j = random.Next(i + 1);
             (values[i], values[j]) = (values[j], values[i]);
         }
 

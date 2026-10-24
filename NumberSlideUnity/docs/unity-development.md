@@ -280,7 +280,14 @@ Vector2 localPosition = new(values[row][column][0], values[row][column][1]);
 
 由于文件顶层是数组，Unity 自带的 `JsonUtility` 不能直接反序列化。可以使用 Newtonsoft.Json 的 `JsonConvert.DeserializeObject<float[][][]>`，或实现一个只支持数字数组的轻量解析器。
 
-`System.Text.Json.JsonSerializer` 在 Unity 2022.3 中不是默认引用的 API。它会自动支持顶层数组，但需要额外安装兼容的 `System.Text.Json` NuGet 包。`System.Web.Script.Serialization.JavaScriptSerializer` 也不属于 Unity 默认可用 API，不建议在 Unity 项目中使用。
+项目已将 `System.Text.Json 8.0.6` 及其依赖作为托管插件放入 `Assets/Plugins/NumberSlide.Core`，Unity 脚本可以直接使用 `System.Text.Json.JsonSerializer`：
+
+```csharp
+using System.Text.Json;
+
+TextAsset jsonAsset = Resources.Load<TextAsset>("BoardLayouts/3x3");
+float[][][] positions = JsonSerializer.Deserialize<float[][][]>(jsonAsset.text);
+```
 
 重新生成布局 JSON：
 
@@ -555,24 +562,39 @@ Unity Input
 
 ### 5.1 Core 程序集接入
 
-当前 `NumberSlide.Core` 目标是 `net10.0`，Unity 2022.3 不能直接引用这个目标框架的程序集。
-
-开始写 Unity 脚本前，必须二选一：
-
-1. 增加 `netstandard2.1` 构建目标，生成 Unity 可引用的 DLL。
-2. 把 Core 整理成带 asmdef 的本地 UPM 包。
-
-推荐第一阶段使用 DLL：
+`NumberSlide.Core` 现在同时构建 `net10.0` 和 `netstandard2.1`。Unity 使用后者编译出的 DLL。
 
 ```text
 NumberSlideUnity/Assets/Plugins/NumberSlide.Core/
 ├── NumberSlide.Core.dll
-└── NumberSlide.Core.pdb
+├── NumberSlide.Core.pdb
+├── System.Text.Json.dll
+├── System.Text.Encodings.Web.dll
+├── Microsoft.Bcl.AsyncInterfaces.dll
+└── System.Runtime.CompilerServices.Unsafe.dll
 ```
 
 构建输出必须放在 Unity `Assets` 目录内，Unity 才会作为插件加载。不要把 `bin/obj` 目录放进 Assets。
 
-Core 中的 `Random.Shared` 等 API 在 `netstandard2.1` 中不可用，生成 Unity 版本前需要替换为兼容实现。
+修改 Core 后，在仓库根目录执行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\build-unity-core.ps1
+```
+
+然后回到 Unity，等待脚本程序集重新编译。
+
+Unity 脚本中的基本使用：
+
+```csharp
+using NumberSlide.Core;
+
+Game game = new(4);
+game.Move(Direction.Left);
+
+byte[,] map = game.board.BoardMap;
+bool completed = game.IsComplete();
+```
 
 ## 6. 输入
 
@@ -738,10 +760,8 @@ anchoredPosition: (0, 0)
 
 ## 12. 已知前置问题
 
-在 Unity 脚本开始引用 Core 前，必须完成以下事项：
+仍需完成以下事项：
 
-- 把 Core 编译为 Unity 可加载的 `netstandard2.1` 程序集。
-- 修正 Core 当前与 Unity 目标框架不兼容的 API。
 - 在 Core 中补充 Unity HUD 所需的步数状态。
 - 分别使用 Unity 与控制台的解决方案，不要把 Unity 自动生成项目加入控制台解决方案。
 
