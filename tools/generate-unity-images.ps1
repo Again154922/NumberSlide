@@ -12,16 +12,16 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
 
 $boardPixels = 1024
 $boardGap = 12
-$tileSizes = [ordered]@{
-    3 = 312
-    4 = 231
-    5 = 182
-    6 = 150
-    7 = 126
-    8 = 109
-    9 = 96
-    10 = 85
-}
+$tileSpecs = @(
+    [pscustomobject]@{ Grid = 3; TilePixels = 312 },
+    [pscustomobject]@{ Grid = 4; TilePixels = 231 },
+    [pscustomobject]@{ Grid = 5; TilePixels = 182 },
+    [pscustomobject]@{ Grid = 6; TilePixels = 150 },
+    [pscustomobject]@{ Grid = 7; TilePixels = 126 },
+    [pscustomobject]@{ Grid = 8; TilePixels = 109 },
+    [pscustomobject]@{ Grid = 9; TilePixels = 96 },
+    [pscustomobject]@{ Grid = 10; TilePixels = 85 }
+)
 
 $palette = @{
     BoardTop = '#C7B5A4'
@@ -33,14 +33,6 @@ $palette = @{
     TileBottom = '#D8C09E'
     TileBorder = '#B69E83'
     TileHighlight = '#FFF8E9'
-    CorrectTop = '#C25A35'
-    CorrectBottom = '#92361D'
-    CorrectBorder = '#6F2412'
-    CorrectHighlight = '#F8C3A7'
-    HintTop = '#EDB650'
-    HintBottom = '#C98522'
-    HintBorder = '#8E5A13'
-    HintHighlight = '#FFF0C1'
 }
 
 function Get-Color([string]$Hex) {
@@ -167,13 +159,7 @@ function Save-Board([string]$Path, [int]$Rows, [int]$TileSize) {
     }
 }
 
-function Save-Tile(
-    [string]$Path,
-    [int]$Size,
-    [string]$TopColor,
-    [string]$BottomColor,
-    [string]$BorderColor,
-    [string]$HighlightColor) {
+function Save-Tile([string]$Path, [int]$Size) {
     $bitmap = New-Canvas $Size $Size
     $graphics = New-Graphics $bitmap
     try {
@@ -200,9 +186,9 @@ function Save-Tile(
             $panelSize `
             $panelSize `
             $radius `
-            $TopColor `
-            $BottomColor `
-            $BorderColor `
+            $palette.TileTop `
+            $palette.TileBottom `
+            $palette.TileBorder `
             ([Math]::Max(1.0, $Size * 0.012))
 
         $inset = [Math]::Max(2.0, [Math]::Round($Size * 0.075))
@@ -213,7 +199,9 @@ function Save-Tile(
             ($panelSize - $inset * 2.0) `
             ([Math]::Max(4.0, $radius * 0.7))
         try {
-            $pen = [System.Drawing.Pen]::new((Get-Color $HighlightColor), [Math]::Max(1.0, $Size * 0.01))
+            $pen = [System.Drawing.Pen]::new(
+                (Get-Color $palette.TileHighlight),
+                [Math]::Max(1.0, $Size * 0.01))
             try {
                 $pen.Alignment = [System.Drawing.Drawing2D.PenAlignment]::Inset
                 $graphics.DrawPath($pen, $highlightPath)
@@ -237,35 +225,29 @@ function Save-Tile(
 New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
 
 $manifestEntries = @()
-foreach ($entry in $tileSizes.GetEnumerator()) {
-    $rows = [int]$entry.Key
-    $tileSize = [int]$entry.Value
+foreach ($spec in $tileSpecs) {
+    $rows = [int]$spec.Grid
+    $tileSize = [int]$spec.TilePixels
     $folderName = '{0}x{0}' -f $rows
     $folder = Join-Path $OutputRoot $folderName
     New-Item -ItemType Directory -Path $folder -Force | Out-Null
 
+    $obsoleteNames = @('Tile.png', 'TileCorrect.png', 'TileHint.png')
+    $obsoleteNames += Get-ChildItem -LiteralPath $folder -File -Filter 'Tile_*.png' |
+        ForEach-Object { $_.Name }
+    foreach ($obsoleteName in $obsoleteNames | Select-Object -Unique) {
+        $obsoletePath = Join-Path $folder $obsoleteName
+        $obsoleteMeta = "$obsoletePath.meta"
+        if ([System.IO.File]::Exists($obsoletePath)) {
+            [System.IO.File]::Delete($obsoletePath)
+        }
+        if ([System.IO.File]::Exists($obsoleteMeta)) {
+            [System.IO.File]::Delete($obsoleteMeta)
+        }
+    }
+
     Save-Board (Join-Path $folder 'Board.png') $rows $tileSize
-    Save-Tile `
-        (Join-Path $folder 'Tile.png') `
-        $tileSize `
-        $palette.TileTop `
-        $palette.TileBottom `
-        $palette.TileBorder `
-        $palette.TileHighlight
-    Save-Tile `
-        (Join-Path $folder 'TileCorrect.png') `
-        $tileSize `
-        $palette.CorrectTop `
-        $palette.CorrectBottom `
-        $palette.CorrectBorder `
-        $palette.CorrectHighlight
-    Save-Tile `
-        (Join-Path $folder 'TileHint.png') `
-        $tileSize `
-        $palette.HintTop `
-        $palette.HintBottom `
-        $palette.HintBorder `
-        $palette.HintHighlight
+    Save-Tile (Join-Path $folder 'Tile.png') $tileSize
 
     $contentPixels = $rows * $tileSize + ($rows - 1) * $boardGap
     $manifestEntries += [ordered]@{
@@ -273,8 +255,6 @@ foreach ($entry in $tileSizes.GetEnumerator()) {
         folder = $folderName
         board = 'Board.png'
         tile = 'Tile.png'
-        tileCorrect = 'TileCorrect.png'
-        tileHint = 'TileHint.png'
         boardPixels = $boardPixels
         tilePixels = $tileSize
         gapPixels = $boardGap
@@ -284,7 +264,7 @@ foreach ($entry in $tileSizes.GetEnumerator()) {
 }
 
 $manifest = [ordered]@{
-    version = 1
+    version = 3
     palette = $palette
     sizes = $manifestEntries
 }

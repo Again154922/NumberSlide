@@ -63,7 +63,7 @@ NumberSlide/
 - 创建 Unity 版本，复用 `NumberSlide.Core`。
 
 Unity 版的像素规格、素材目录、场景布局、Prefab 和组件要求见
-[Unity 开发规格](docs/unity-development.md)。
+[Unity 开发规格](NumberSlideUnity/docs/unity-development.md)。
 
 ## 技术说明
 

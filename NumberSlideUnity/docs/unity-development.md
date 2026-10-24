@@ -35,9 +35,7 @@ Images/
 ├── asset-manifest.json
 ├── 3x3/
 │   ├── Board.png
-│   ├── Tile.png
-│   ├── TileCorrect.png
-│   └── TileHint.png
+│   └── Tile.png
 ├── 4x4/
 ├── 5x5/
 ├── 6x6/
@@ -47,16 +45,14 @@ Images/
 └── 10x10/
 ```
 
-每阶目录都有四个文件：
+每阶目录包含一张棋盘图和一张空白方块：
 
 | 文件 | 用途 |
 | --- | --- |
 | `Board.png` | 棋盘底板和空格槽 |
-| `Tile.png` | 普通方块 |
-| `TileCorrect.png` | 已处于正确位置的方块 |
-| `TileHint.png` | 提示高亮方块 |
+| `Tile.png` | 所有数字共用的空白方块 |
 
-方块图不包含数字。数字统一使用 TextMeshPro 子对象显示，避免生成 1～99 的重复图片。
+数字不烘焙进方块图片，而是由 Tile Prefab 中的 TextMeshPro 子对象显示。
 
 ### 2.1 原生像素规格
 
@@ -73,7 +69,7 @@ Images/
 | 9×9 | 1024×1024 | 96×96 | 12 | 960 | 32 |
 | 10×10 | 1024×1024 | 85×85 | 12 | 958 | 33 |
 
-`Tile.png`、`TileCorrect.png`、`TileHint.png` 在同一阶目录中尺寸完全一致。
+`Tile.png` 的尺寸由难度决定，下表仍然适用。
 
 计算公式：
 
@@ -121,9 +117,9 @@ displayCellY = displayOffset + row * (displayTile + 7.5)
 
 `RectTransform` 允许小数像素。不要为了取整改变每个方块的尺寸，否则大尺寸棋盘会累积错位。
 
-### 2.3 数字字号
+### 2.3 TextMeshPro 数字字号
 
-数字使用 `TextMeshProUGUI`，中心对齐，`Best Fit` 关闭，使用下表中的固定字号：
+数字使用 `TextMeshProUGUI` 居中显示，建议字号：
 
 | 地图 | 字号 |
 | --- | ---: |
@@ -136,7 +132,7 @@ displayCellY = displayOffset + row * (displayTile + 7.5)
 | 9×9 | 30 |
 | 10×10 | 26 |
 
-数字文本的 RectTransform 拉伸填充方块，左右内边距不少于显示方块宽度的 `6%`。数字内容为方块值，空格 `0` 不创建数字对象。
+数字为 `0` 时不创建 Tile；棋盘底图的槽位直接作为空格。
 
 ### 2.4 UI 配色
 
@@ -146,16 +142,12 @@ displayCellY = displayOffset + row * (displayTile + 7.5)
 | 棋盘顶部渐变 | `#C7B5A4` |
 | 棋盘底部渐变 | `#A9917E` |
 | 棋盘边框 | `#7D6A5B` |
-| 普通方块顶部 | `#F1E3C9` |
-| 普通方块底部 | `#D8C09E` |
-| 普通方块边框 | `#B69E83` |
-| 正确位置方块顶部 | `#C25A35` |
-| 正确位置方块底部 | `#92361D` |
-| 提示方块顶部 | `#EDB650` |
-| 提示方块底部 | `#C98522` |
+| 方块顶部 | `#F1E3C9` |
+| 方块底部 | `#D8C09E` |
+| 方块边框 | `#B69E83` |
+| 正确位置高亮 | `#C25A35` |
+| 提示高亮 | `#E0A33A` |
 | 普通数字 | `#5C4B3A` |
-| 正确位置数字 | `#FFF8E9` |
-| 提示数字 | `#4B3214` |
 | 主按钮 | `#B04A28` |
 | 次按钮 | `#8D7562` |
 | 按钮文字 | `#FFF8E9` |
@@ -180,6 +172,40 @@ displayCellY = displayOffset + row * (displayTile + 7.5)
 
 棋盘和方块都保持原始宽高比，不使用九宫格拉伸。不同难度使用独立预渲染图片。
 
+### 2.6 Unity 世界单位与像素换算
+
+所有 Sprite 的 `Pixels Per Unit` 固定为 `100`，因此：
+
+```text
+1 Unity 世界单位 = 100 像素
+1 像素 = 0.01 Unity 世界单位
+```
+
+当 SpriteRenderer 的 `Transform.localScale = (1, 1, 1)` 时：
+
+| 资源 | 像素尺寸 | 世界尺寸 |
+| --- | ---: | ---: |
+| Board.png | 1024×1024 | 10.24×10.24 |
+| 3×3 Tile | 312×312 | 3.12×3.12 |
+| 4×4 Tile | 231×231 | 2.31×2.31 |
+| 5×5 Tile | 182×182 | 1.82×1.82 |
+| 6×6 Tile | 150×150 | 1.50×1.50 |
+| 7×7 Tile | 126×126 | 1.26×1.26 |
+| 8×8 Tile | 109×109 | 1.09×1.09 |
+| 9×9 Tile | 96×96 | 0.96×0.96 |
+| 10×10 Tile | 85×85 | 0.85×0.85 |
+| 格间距 | 12 | 0.12 |
+
+如果把整个棋盘作为 SpriteRenderer 放进世界：
+
+```text
+1024 px / 100 PPU = 10.24 Unity 世界单位
+```
+
+当 `orthographicSize = 6` 时，摄像机可视高度是 `12` 世界单位，因此 `10.24×10.24` 的棋盘可以在高度方向完整显示。
+
+注意：Canvas 的 Screen Space 参考像素和世界单位不是同一套坐标。棋盘 JSON 使用 `640×640` Canvas 参考像素；如果把棋盘放进世界空间，则需要按 `worldSize / 640` 缩放这些坐标。
+
 重新生成素材：
 
 ```powershell
@@ -187,6 +213,74 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\generate-unity-images.
 ```
 
 生成完成后回到 Unity，等待 `AssetDatabase` 刷新。必须提交 Unity 生成的 `.meta` 文件。
+
+### 2.7 棋盘格子坐标
+
+每个难度的全部格子坐标位于：
+
+```text
+NumberSlideUnity/Assets/Resources/BoardLayouts/
+├── 3x3.json
+├── 4x4.json
+├── 5x5.json
+├── 6x6.json
+├── 7x7.json
+├── 8x8.json
+├── 9x9.json
+└── 10x10.json
+```
+
+坐标系统：
+
+```text
+原点：640×640 棋盘中心
+X 轴：向右为正
+Y 轴：向上为正
+单位：Canvas 参考像素
+```
+
+每个 JSON 包含当前棋盘全部 `grid × grid` 个格子，空格所在的坐标同样存在。格子的 `localPosition` 可以直接赋给 Tile 的 `anchoredPosition`，前提是：
+
+```text
+Board: Anchor Min/Max = (0.5, 0.5), Pivot = (0.5, 0.5)
+Tile:  Anchor Min/Max = (0.5, 0.5), Pivot = (0.5, 0.5)
+```
+
+示例：
+
+```json
+[
+  [
+    [202.5, 202.5],
+    [0.0, 202.5],
+    [-202.5, 202.5]
+  ],
+  [
+    [202.5, 0.0],
+    [0.0, 0.0],
+    [-202.5, 0.0]
+  ],
+  [
+    [202.5, -202.5],
+    [0.0, -202.5],
+    [-202.5, -202.5]
+  ]
+]
+```
+
+JSON 顶层是行数组，每一行是列数组，每个格子是 `[x, y]`。索引方式：
+
+```csharp
+Vector2 localPosition = new(values[row][column][0], values[row][column][1]);
+```
+
+由于文件顶层是数组，Unity 自带的 `JsonUtility` 不能直接反序列化。可以使用 Newtonsoft.Json 的 `JsonConvert.DeserializeObject<float[][][]>`，或实现一个只支持数字数组的轻量解析器。
+
+重新生成布局 JSON：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\generate-board-layouts.ps1
+```
 
 ## 3. 场景
 
@@ -226,11 +320,33 @@ MainMenu
 ```text
 Canvas
 ├── Render Mode: Screen Space - Overlay
+├── Pixel Perfect: Off
+├── Sort Order: 0
 ├── Canvas Scaler: Scale With Screen Size
 ├── Reference Resolution: 1280 × 720
 ├── Screen Match Mode: Match Width Or Height
-└── Match: 0.5
+├── Match: 0.5
+├── Reference Pixels Per Unit: 100
+└── Graphic Raycaster: On
 ```
+
+每个场景只保留一个根 Canvas 和一个 Canvas Scaler。Tile Prefab 内部不要再放 Canvas，也不要再放 Canvas Scaler。Tile 内的 `TextMeshProUGUI` 会自动继承根 Canvas。
+
+额外 Canvas 只用于确实需要独立排序层、独立渲染批次或独立缩放的特殊 UI。给 99 个 Tile 每个加一个 Canvas 会制造 99 个独立 Canvas，增加绘制开销并破坏合批。
+
+Tile 中 TMP 的设置：
+
+```text
+Component: TextMeshProUGUI
+Font Asset: 项目统一选择的 TMP Font Asset
+Font Size: 按下文难度表
+Auto Size: Off
+Alignment: Center / Middle
+Rich Text: Off（纯数字不需要）
+Raycast Target: Off
+```
+
+如果使用普通 SpriteRenderer 而非 UGUI，则文本组件应使用 `TextMeshPro`，不是 `TextMeshProUGUI`，并且需要 MeshRenderer 和正确的 Sorting Layer/Order。
 
 布局像素：
 
@@ -345,15 +461,12 @@ TileSkin[] tileSkins
 byte gridSize
 Sprite board
 Sprite tile
-Sprite tileCorrect
-Sprite tileHint
 int tilePixels
 int gapPixels
 int offsetPixels
-int numberFontSize
 ```
 
-直接按 `asset-manifest.json` 填写上表数值，不在运行时从文件系统读取。
+每个难度只需要引用对应目录的一张 `Tile.png`。数字由 Tile Prefab 内的 TextMeshPro 子对象显示。直接按下表和 `asset-manifest.json` 填写尺寸，不在运行时从文件系统读取。
 
 ### 4.2 Tile.prefab
 
@@ -367,31 +480,21 @@ Tile
 │   └── Preserve Aspect: On
 ├── TileView (MonoBehaviour)
 └── Number
-    ├── RectTransform: 拉伸，四边为 0
+    ├── RectTransform: 拉伸填满 Tile，四边为 0
     ├── TextMeshProUGUI
     ├── Alignment: Center / Middle
-    ├── Font Size: numberFontSize
     ├── Raycast Target: Off
-    └── Color: 普通数字色
+    └── Color: #5C4B3A
 ```
 
 `TileView` 公开接口：
 
 ```text
-void SetIcon(Sprite tileSprite)
-void SetValue(byte value, int fontSize)
-void SetState(TileVisualState state)
+void SetNumber(byte value)
+void SetHighlight(bool enabled)
 ```
 
-`TileVisualState`：
-
-```text
-Normal
-CorrectPosition
-Hint
-```
-
-数字为 `0` 时不创建 Tile；对应位置只显示 Board.png 中的空格槽。
+数字 TextMeshPro 子对象不需要额外 Canvas。它会自动继承 Tile 所在的根 Canvas。不要为每个 Tile 添加 Canvas 或 Canvas Scaler。数字为 `0` 时不创建 Tile；对应位置只显示 `Board.png` 中的空格槽。
 
 ### 4.3 WinPanel.prefab
 
@@ -498,32 +601,74 @@ Esc            → 返回菜单或关闭胜利面板
 坐标原点与锚点：
 
 ```text
-TileContainer Anchor: Top Left
-TileContainer Pivot: Top Left
-Tile Anchor: Top Left
-Tile Pivot: Top Left
+Board/TileContainer Anchor Min: (0.5, 0.5)
+Board/TileContainer Anchor Max: (0.5, 0.5)
+Board/TileContainer Pivot: (0.5, 0.5)
+Tile Anchor Min: (0.5, 0.5)
+Tile Anchor Max: (0.5, 0.5)
+Tile Pivot: (0.5, 0.5)
 ```
 
-位置计算：
+按 `Resources/BoardLayouts/{grid}x{grid}.json` 设置位置：
+
+```csharp
+var cell = values[row][column];
+rectTransform.anchoredPosition = new Vector2(cell[0], cell[1]);
+```
+
+当 Board 和 Tile 的 Pivot 都是中心，且两者 Anchor 都位于中心时，`anchoredPosition` 与 `localPosition` 数值相同。
+
+### 7.1 Camera 正交尺寸与 RectTransform
+
+Unity 的 `Camera.orthographicSize` 表示可见高度的**一半**：
 
 ```text
-x = displayOffset + column * (displayTile + displayGap)
-y = -(displayOffset + row * (displayTile + displayGap))
+可视世界高度 = orthographicSize × 2
+可视顶部 Y   = orthographicSize
+可视底部 Y   = -orthographicSize
 ```
 
-UI 的 Y 轴向上，因此行向下移动时使用负 Y。
+当 `orthographicSize = 6` 时，摄像机中心在 `Y = 0`，可视顶部是 `Y = 6`。
+
+如果希望 RectTransform 的 `localPosition = (0, 6)` 正好表示对象上沿位于屏幕顶部，需要：
+
+```text
+父物体/Canvas Pivot: (0.5, 0.5)
+对象 Anchor Min: (0.5, 0.5)
+对象 Anchor Max: (0.5, 0.5)
+对象 Pivot: (0.5, 1.0)
+对象 localPosition / anchoredPosition: (0, 6)
+```
+
+此时 RectTransform 的原点位于对象顶部中心，`(0, 6)` 正好是顶部坐标。
+
+如果使用 Top-Center Anchor，则更常见的设置是：
+
+```text
+Anchor Min/Max: (0.5, 1)
+Pivot: (0.5, 1)
+anchoredPosition: (0, 0)
+```
+
+这种设置会让对象上沿始终贴合父物体顶部，但不保证 `localPosition` 等于 `(0, 6)`。
+
+注意：
+
+- `orthographicSize = 6` 的可视高度是 `12`，不是 `6`。
+- 如果可视高度真的只有 `6`，则 `orthographicSize = 3`，顶部 Y 是 `3`，此时坐标应为 `(0, 3)`。
+- Screen Space UI 的 `localPosition` 单位是 Canvas 参考像素，不是世界单位。若要直接用世界坐标 `(0, 6)`，应使用 World Space Canvas，或按 Canvas 缩放进行坐标转换。
 
 ## 8. 状态显示
 
-### 8.1 数字颜色
+### 8.1 方块显示
 
-| 状态 | Sprite | 数字颜色 |
-| --- | --- | --- |
-| 普通 | Tile.png | `#5C4B3A` |
-| 正确位置 | TileCorrect.png | `#FFF8E9` |
-| 提示 | TileHint.png | `#4B3214` |
+| 状态 | 显示方式 |
+| --- | --- |
+| 普通 | `Tile.png`，数字由 TMP 子对象显示 |
+| 正确位置 | 保持原 Sprite，添加 `Outline`，颜色 `#C25A35` |
+| 提示 | 保持原 Sprite，添加 `Outline`，颜色 `#E0A33A`，可放大至 `1.04` |
 
-“正确位置”只在方块数字与目标位置完全一致时启用。
+正确位置和提示效果不增加图片文件，使用 UGUI 的 `Outline`、`Image.color` 或一个不显示文字的彩色 Overlay 实现。
 
 ### 8.2 HUD
 
