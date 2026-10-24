@@ -7,7 +7,7 @@ Add-Type -AssemblyName System.Drawing
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
-    $OutputRoot = Join-Path $repoRoot 'src\NumberSlideUnity\Assets\Images'
+    $OutputRoot = Join-Path $repoRoot 'NumberSlideUnity\Assets\Images'
 }
 
 $boardPixels = 1024

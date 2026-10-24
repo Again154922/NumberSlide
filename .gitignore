@@ -14,17 +14,17 @@ TestResults/
 *.sln.iml
 
 # Unity project files
-src/NumberSlideUnity/[Ll]ibrary/
-src/NumberSlideUnity/[Tt]emp/
-src/NumberSlideUnity/[Oo]bj/
-src/NumberSlideUnity/[Bb]uild/
-src/NumberSlideUnity/[Bb]uilds/
-src/NumberSlideUnity/[Ll]ogs/
-src/NumberSlideUnity/[Uu]ser[Ss]ettings/
-src/NumberSlideUnity/*.csproj
-src/NumberSlideUnity/*.sln
-src/NumberSlideUnity/*.slnx
-src/NumberSlideUnity/*.unityproj
+NumberSlideUnity/[Ll]ibrary/
+NumberSlideUnity/[Tt]emp/
+NumberSlideUnity/[Oo]bj/
+NumberSlideUnity/[Bb]uild/
+NumberSlideUnity/[Bb]uilds/
+NumberSlideUnity/[Ll]ogs/
+NumberSlideUnity/[Uu]ser[Ss]ettings/
+NumberSlideUnity/*.csproj
+NumberSlideUnity/*.sln
+NumberSlideUnity/*.slnx
+NumberSlideUnity/*.unityproj
 
 # Editor and OS files
 .vscode/

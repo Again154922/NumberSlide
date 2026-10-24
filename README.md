@@ -20,8 +20,8 @@
 需要 .NET 10 SDK。
 
 ```bash
-dotnet build NumberSlide.sln
-dotnet run --project src/NumberSlideConsole/NumberSlideConsole.csproj
+dotnet build NumberSlideConsole/NumberSlideConsole.sln
+dotnet run --project NumberSlideConsole/NumberSlideConsole/NumberSlideConsole.csproj
 ```
 
 控制台启动后，输入棋盘宽度 `3`～`10` 即可开始游戏。
@@ -30,17 +30,23 @@ dotnet run --project src/NumberSlideConsole/NumberSlideConsole.csproj
 
 ```text
 NumberSlide/
-├── NumberSlide.sln
-├── src/
+├── NumberSlideConsole/
+│   ├── NumberSlideConsole.sln
 │   ├── NumberSlide.Core/
 │   └── NumberSlideConsole/
-└── docs/
+├── NumberSlideUnity/
+│   ├── Assets/
+│   ├── Packages/
+│   └── ProjectSettings/
+├── docs/
+└── tools/
 ```
 
 - `NumberSlide.Core`：棋盘状态、编号生成、可解性判定、移动、撤销和完成判断。
 - `NumberSlideConsole`：终端输入输出、清屏、棋盘布局和提示信息。
+- `NumberSlideUnity`：Unity 工程、场景、图片素材和后续 Unity 表现层。
 
-Core 不依赖控制台或 Unity API。后续 Unity 版本应通过 Core 公开的游戏对象调用逻辑，而不是复制规则。
+控制台和 Unity 工程使用各自的解决方案，避免 Unity 自动生成的项目文件覆盖普通 .NET 项目配置。Core 不依赖控制台或 Unity API；后续 Unity 版本应通过 Core 公开的游戏对象调用逻辑，而不是复制规则。
 
 ## 核心规则
 

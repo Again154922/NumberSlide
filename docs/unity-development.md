@@ -10,22 +10,22 @@
 | UI | `com.unity.ugui 1.0.0` |
 | 文本 | TextMeshPro `3.0.7` |
 | IDE | Rider 2026.2 |
-| 根解决方案 | `NumberSlide.sln` |
-| Unity 解决方案 | `src/NumberSlideUnity/NumberSlideUnity.sln` |
-| Unity 工程 | `src/NumberSlideUnity` |
+| 控制台解决方案 | `NumberSlideConsole/NumberSlideConsole.sln` |
+| Unity 解决方案 | `NumberSlideUnity/NumberSlideUnity.sln` |
+| Unity 工程 | `NumberSlideUnity` |
 | 设计分辨率 | `1280 × 720` |
 | 画布缩放 | `Scale With Screen Size` |
 | 参考分辨率 | `1280 × 720` |
 | Match | `0.5` |
 
-`NumberSlide.sln` 是日常开发入口。Unity 自动生成的 `.sln` 和 `.csproj` 是派生物，不手工修改。
+Unity 开发使用 `NumberSlideUnity.sln`，控制台和 Core 开发使用 `NumberSlideConsole.sln`。Unity 自动生成的 `.sln` 和 `.csproj` 是派生物，不手工修改。
 
 ## 2. 图片素材
 
 素材根目录：
 
 ```text
-src/NumberSlideUnity/Assets/Images/
+NumberSlideUnity/Assets/Images/
 ```
 
 目录结构：
@@ -456,7 +456,7 @@ Unity Input
 推荐第一阶段使用 DLL：
 
 ```text
-src/NumberSlideUnity/Assets/Plugins/NumberSlide.Core/
+NumberSlideUnity/Assets/Plugins/NumberSlide.Core/
 ├── NumberSlide.Core.dll
 └── NumberSlide.Core.pdb
 ```
@@ -586,6 +586,6 @@ UI 的 Y 轴向上，因此行向下移动时使用负 Y。
 - 把 Core 编译为 Unity 可加载的 `netstandard2.1` 程序集。
 - 修正 Core 当前与 Unity 目标框架不兼容的 API。
 - 在 Core 中补充 Unity HUD 所需的步数状态。
-- 固定 `NumberSlide.sln` 中 `Assembly-CSharp.csproj` 的生成顺序。
+- 分别使用 Unity 与控制台的解决方案，不要把 Unity 自动生成项目加入控制台解决方案。
 
 这些属于 Core 接入任务，不应在 `BoardView` 或 `GameController` 中用重复逻辑绕过。
